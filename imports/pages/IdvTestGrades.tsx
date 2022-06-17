@@ -9,6 +9,7 @@ import { TestFormCollectionType } from "../types/TestFormCollectionType";
 import { PromoStudentsCollectionType } from "../types/PromoStudentsCollectionType";
 import { StudentsTestsCorrectionsCollectionType } from "/imports/types/StudentsTestsCorrectionsCollectionType";
 import { StudentsTestsCorrectionsCollection } from "../api/StudentsTestsCorrectionsCollection";
+import { Button, Form, Header, Table, Modal } from "semantic-ui-react";
 
 const IdvTestGrades = () => {
   //Use params
@@ -58,69 +59,65 @@ const IdvTestGrades = () => {
         <>
           {dataTest ? (
             <>
-              <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                  <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                    <tr>
-                      <th>Student name</th>
+              <div>
+                <Table striped celled size="large" padded>
+                  <Table.Header className="largeText">
+                    <Table.Row>
+                      <Table.HeaderCell scope="col">Student name</Table.HeaderCell>
                       {dataTest.questions.map((e, i) => {
                         return (
-                          <th
+                          <Table.HeaderCell
                             key={`question${i}`}
                             scope="col"
-                            className="px-6 py-3"
                           >
                             Q{i + 1}
-                          </th>
+                          </Table.HeaderCell>
                         );
                       })}
-                      <th scope="col" className="px-6 py-3">
+                      <Table.HeaderCell scope="col">
                         Total
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                      </Table.HeaderCell>
+                    </Table.Row>
+                  </Table.Header>
+                  <Table.Body>
                     {dataPromo.students.map((student, studentIndex) => {
                       return (
-                        <tr
+                        <Table.Row
                           key={`student${studentIndex}`}
-                          className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
                         >
-                          <th
+                          <Table.Cell
                             scope="row"
-                            className="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap"
                           >
-                            {student.firstName + " " + student.lastName ||
-                              student.firstAndLastName}
-                          </th>
+                            {student.firstName && student.lastName
+                              ? student.firstName + " " + student.lastName
+                              : student.firstAndLastName}
+                          </Table.Cell>
                           {dataCorrections.map((e) => {
                             if (e.studentNumber == studentIndex) {
                               return (
-                                <td
+                                <Table.Cell
                                   key={`grade${studentIndex}${e.points}${e.questionNumber}`}
                                   scope="col"
-                                  className="px-6 py-3"
                                 >
                                   {(
                                     dataTest.questions[e.questionNumber]
                                       .barem! * e.points
                                   ).toFixed(2)}
-                                </td>
+                                </Table.Cell>
                               );
                             }
                           })}
-                          <td
+                          <Table.Cell
                             key={`total${studentIndex}`}
                             scope="col"
-                            className="px-6 py-3"
                           >
                             {totalStudent(studentIndex).toFixed(2)}
-                          </td>
-                        </tr>
+                          </Table.Cell>
+                        </Table.Row>
                       );
                     })}
-                  </tbody>
-                </table>
+                  </Table.Body>
+                </Table>
               </div>
             </>
           ) : (
