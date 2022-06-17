@@ -7,6 +7,8 @@ import { useNavigate } from "react-router-dom";
 import { Meteor } from "meteor/meteor";
 import { PromoStudentsCollectionType } from "/imports/types/PromoStudentsCollectionType";
 import { QuestionType } from "/imports/types/TestFormCollectionType";
+import toast from "react-hot-toast";
+import { Button, Form, Segment, Select, Header, Grid } from "semantic-ui-react";
 //@TODO
 //Manage to do only one handle change and one set variables
 
@@ -17,6 +19,7 @@ const CreateTest = () => {
   const [promoSelect, setPromoSelect] = React.useState<string>("");
   const [questionsNumber, setQuestionsNumber] = React.useState<number>(0);
   const [questions, setQuestions] = React.useState<QuestionType[]>([]);
+  const [submit, setSubmit] = React.useState<boolean>(false);
   //GET DATA //
   const isLoading = useSubscribe("findPromos");
   const studentPromos: PromoStudentsCollectionType[] = useFind(() =>
@@ -25,13 +28,25 @@ const CreateTest = () => {
 
   //////SUBMIT EVENT///////
   //GRADING FORM//
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
-    //Won't submit if there is no value
-    e.preventDefault();
-    //if Value
-    if (!name) return;
-    if (!promoSelect) return;
-    insertCollection();
+  const handleSubmit = (): void => {
+    if (!name && !promoSelect) {
+      toast.error("Please add a name and choose a promo");
+      return;
+    }
+    if (!name) {
+      toast.error("Please add a name");
+      return;
+    }
+    if (!promoSelect) {
+      toast.error("Please choose a promo");
+      return;
+    }
+    setQuestions(
+      questions.filter((e: any) => {
+        return e != null;
+      })
+    );
+    setSubmit(true);
   };
 
   ///////ONCHANGE EVENT///////
@@ -101,22 +116,34 @@ const CreateTest = () => {
     );
   };
 
+  React.useEffect(() => {
+    if (submit) {
+      insertCollection();
+    }
+  }, [submit]);
+
   return (
     <>
-    <h1 className="text-3xl mb-8"> New Test </h1>
-      <form
-        className="flex flex-col items-left shadow-md rounded w-full px-8 pt-6 pb-8"
-        onSubmit={handleSubmit}
+      <Header as="h1"> New Test </Header>
+      <Form
+        id="formTest"
+        onSubmit={(e) => {
+          e.preventDefault();
+        }}
       >
-        <input
-          className="my-8 md:mr-5 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 text-lg leading-tight focus:outline-none focus:shadow-outline"
-          id="name"
-          type="text"
-          placeholder="Test Name"
-          value={name}
-          onChange={handleChangeName}
-        />
-        <h1>Questions : {questionsNumber} questions</h1>
+        <Form.Field className="largeText" inline width="4">
+          <label>
+            <Header as="h3">Test Name : </Header>
+          </label>
+          <input
+            id="name"
+            type="text"
+            placeholder="Test Name"
+            value={name}
+            onChange={handleChangeName}
+          />
+        </Form.Field>
+        <Header as="h2">Questions : {questionsNumber} questions</Header>
 
         <AddQuestions
           questions={questions}
@@ -124,59 +151,62 @@ const CreateTest = () => {
           handleChangeQuestion={handleChangeQuestion}
         />
 
-        <button
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded focus:outline-none focus:shadow-outline"
+        <Button
           onClick={() => {
             setQuestionsNumber(questionsNumber + 1);
           }}
+          type="button"
         >
           Add more questions
-        </button>
+        </Button>
+
         {isLoading() ? (
           "Loading..."
         ) : (
-          <div className="flex flex-row justify-center my-10">
+          <Grid centered columns="2">
             {studentPromos.length == 0 ? (
-              <p >No promos are available, please import a new promo</p>
+              <Grid.Column className="spaceOnY">
+                <Header as="h4">No promos are available, please import a new promo</Header>
+              </Grid.Column>
             ) : (
-              <select
-                onChange={handleChangePromoSelect}
-                id="promoSelect"
-                defaultValue="default"
-                className="w-1/3 mr-10"
-              >
-                <option
-                  hidden
-                  disabled
-                  id="default"
-                  key="default"
-                  value="default"
+              <Grid.Column className="spaceOnY">
+                <select
+                  onChange={handleChangePromoSelect}
+                  id="promoSelect"
+                  defaultValue="default"
                 >
-                  select a promo
-                </option>
-                {studentPromos.map((promo) => {
-                  return (
-                    <option
-                      key={promo._id.toString()}
-                      value={promo._id.toString()}
-                    >
-                      {promo.name}
-                    </option>
-                  );
-                })}
-              </select>
+                  <option
+                    hidden
+                    disabled
+                    id="default"
+                    key="default"
+                    value="default"
+                  >
+                    select a promo
+                  </option>
+                  {studentPromos.map((promo) => {
+                    return (
+                      <option
+                        key={promo._id.toString()}
+                        value={promo._id.toString()}
+                      >
+                        {promo.name}
+                      </option>
+                    );
+                  })}
+                </select>
+              </Grid.Column>
             )}
-            <PromoImport />
-          </div>
+            <Grid.Column className="spaceOnY">
+              <PromoImport />
+            </Grid.Column>
+          </Grid>
         )}
 
-        <button
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded focus:outline-none focus:shadow-outline"
-          type="submit"
-        >
+        <Button primary type="button" onClick={handleSubmit}>
           Create Test
-        </button>
-      </form>
+        </Button>
+      </Form>
     </>
   );
 };

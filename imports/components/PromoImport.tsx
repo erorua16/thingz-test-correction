@@ -1,6 +1,8 @@
 import React from "react";
 import { Meteor } from "meteor/meteor";
-import Modal from "./Modal";
+import { Button, Form, Header, Table, Modal } from "semantic-ui-react";
+import toast from "react-hot-toast";
+
 type StudentsType = [{ firstName: ""; lastName: "" }];
 type colNameType = {
   col1: "";
@@ -23,7 +25,7 @@ const PromoImport = (): React.ReactElement => {
   const [submitedFile, setSubmitedFile] = React.useState<boolean>(false);
   const fileReader: FileReader = new FileReader();
   const headerKeys: string[] = Object.keys(Object.assign({}, ...fileInfo));
-
+  const [open, setOpen] = React.useState(false);
   React.useEffect(() => {
     if (promo) {
       if (!promoName) return;
@@ -51,13 +53,15 @@ const PromoImport = (): React.ReactElement => {
   /////RENAME COLS///////
   const renameKeys = (): void => {
     //set newheader
-    const newCol: string[] = Object.values(colName);
-
+    const newCol: string[] = Object.values(colName).filter((e) => {
+      return e != "";
+    });
     if (newCol.includes("firstAndLastName")) {
       if (newCol.length > 1) {
-        return alert(
+        toast.error(
           "If a column contains both the first and last name, only assign said column the value"
         );
+        return;
       }
       //set new data
       setNewColName(newCol);
@@ -69,7 +73,10 @@ const PromoImport = (): React.ReactElement => {
         setNewColName(newCol);
         setPromo(true);
       } else {
-        alert("Please declare both a column for both the first and last name");
+        toast.error(
+          "Please declare both a column for both the first and last name"
+        );
+        return;
       }
     }
   };
@@ -107,21 +114,24 @@ const PromoImport = (): React.ReactElement => {
   };
 
   /////HANDLE SUBMIT/////
-  const handleFileSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleFileSubmit = () => {
     //stay on page and won't submit if empty
-    e.preventDefault();
-    if (!file) return;
-    if (!promoName) return;
+    if (!file) {
+      toast.error("Pleade add a CSV file");
+      return;
+    }
+    if (!promoName) {
+      toast.error("Pleade add a name to your promo");
+      return;
+    }
     fileReader.onload = (e: any) => {
       const csvOutput = e.target.result;
       csvFileToArray(csvOutput);
     };
-    await fileReader.readAsText(file);
-    await setSubmitedFile(true);
+    fileReader.readAsText(file);
+    setSubmitedFile(true);
   };
-  const handleColSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    //stay on page and won't submit if empty
-    e.preventDefault();
+  const handleColSubmit = () => {
     if (!fileInfo) return;
     //Rename the cols
     renameKeys();
@@ -138,9 +148,10 @@ const PromoImport = (): React.ReactElement => {
       },
       (err: any) => {
         if (err) {
-          alert(err.message);
+          console.log(err.message);
         } else {
           //Reset variables
+          toast.success(`Promo ${promoName} has been added `);
           setPromoName("");
           setFileInfo([]);
           setColName({
@@ -149,131 +160,141 @@ const PromoImport = (): React.ReactElement => {
           setSubmitedFile(false);
           setFile(undefined);
           setPromo(false);
-          alert("success!");
         }
       }
     );
   };
 
   return (
-    <>
-      <Modal
-        borderColor=""
-        button={
-          <button className="bg-blue-500 md:h-full md:w-full hover:bg-blue-700 text-white font-bold py-2 px-3 rounded focus:outline-none focus:shadow-outline" type="button">
-            Add new promo
-          </button>
-        }
-        element={
-          <>
-            <form action="" onSubmit={handleFileSubmit}>
-              <input
-                type="file"
-                id="csvFileInput"
-                accept=".csv"
-                onChange={handleFileChange}
-              />
-              <input
-                className="my-8 md:mr-5 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 text-lg leading-tight focus:outline-none focus:shadow-outline"
-                type="text"
-                id="promoName"
-                value={promoName}
-                onChange={handlePromoNameChange}
-                placeholder="Insert promo name"
-              />
-              <button
-                type="submit"
-                className="bg-blue-500 md:h-[30%] md:w-[30%] hover:bg-blue-700 text-white font-bold py-2 px-3 rounded focus:outline-none focus:shadow-outline"
-              >
-                Import CSV
-              </button>
-            </form>
+    <Modal
+      closeIcon
+      open={open}
+      trigger={<Button type="button">Add new promo</Button>}
+      onClose={() => setOpen(false)}
+      onOpen={() => setOpen(true)}
+    >
+      <Modal.Content scrolling>
+        <Header icon="archive" content="Import new promo" />
+        <Form
+          id="csvForm"
+          action=""
+          onSubmit={(e) => {
+            e.preventDefault();
+          }}
+        >
+          <Form.Field>
+            <input
+              type="file"
+              id="csvFileInput"
+              accept=".csv"
+              onChange={handleFileChange}
+            />
+          </Form.Field>
+          <Form.Field>
+            <label>Promo Name</label>
+            <input
+              type="text"
+              id="promoName"
+              value={promoName}
+              onChange={handlePromoNameChange}
+              placeholder="Insert promo name"
+            />
+          </Form.Field>
+          <Button secondary type="button" onClick={handleFileSubmit}>
+            Import CSV
+          </Button>
+        </Form>
 
-            {submitedFile ? (
-              <form action="" onSubmit={handleColSubmit}>
-                <table>
-                  <thead>
-                    <tr>
-                      {headerKeys.map((key, i = 0) => {
-                        i++;
-                        return (
-                          <>
-                            <th key={`col${i}`}>
-                              <p>{key}</p>
-                              <select
-                                onChange={handleColSelect}
-                                id={`col${i}`}
-                                key={`col${i}`}
-                                defaultValue="default"
+        {submitedFile ? (
+          <Form
+            className="spaceOnY"
+            id="promoForm"
+            action=""
+            onSubmit={(e) => {
+              e.preventDefault();
+            }}
+          >
+            <Table size="small" striped celled collapsing padded columns="2">
+              <Table.Header>
+                <Table.Row>
+                  {headerKeys.map((key, i = 0) => {
+                    i++;
+                    return (
+                      <>
+                        <Table.HeaderCell key={`col${i}`}>
+                          <Form.Field inline>
+                            <label>{key}</label>
+                            <select
+                              onChange={handleColSelect}
+                              id={`col${i}`}
+                              key={`col${i}`}
+                              defaultValue="default"
+                            >
+                              <option
+                                hidden
+                                disabled
+                                id="default"
+                                key="default"
+                                value="default"
                               >
-                                <option
-                                  hidden
-                                  disabled
-                                  id="default"
-                                  key="default"
-                                  value="default"
-                                >
-                                  select an option
-                                </option>
-                                <option
-                                  key="firstName"
-                                  value="firstName"
-                                  id="firstName"
-                                >
-                                  First Name
-                                </option>
-                                <option
-                                  key="lastName"
-                                  id="lastName"
-                                  value="lastName"
-                                >
-                                  Last Name
-                                </option>
-                                <option
-                                  key="firstAndLastName"
-                                  value="firstAndLastName"
-                                  id="firstAndLastName"
-                                >
-                                  First Name And Last Name
-                                </option>
-                              </select>
-                            </th>
-                          </>
-                        );
-                      })}
-                    </tr>
-                  </thead>
+                                select an option
+                              </option>
+                              <option id="empty" key="empty" value=""></option>
+                              <option
+                                key="firstName"
+                                value="firstName"
+                                id="firstName"
+                              >
+                                First Name
+                              </option>
+                              <option
+                                key="lastName"
+                                id="lastName"
+                                value="lastName"
+                              >
+                                Last Name
+                              </option>
+                              <option
+                                key="firstAndLastName"
+                                value="firstAndLastName"
+                                id="firstAndLastName"
+                              >
+                                First Name And Last Name
+                              </option>
+                            </select>
+                          </Form.Field>
+                        </Table.HeaderCell>
+                      </>
+                    );
+                  })}
+                </Table.Row>
+              </Table.Header>
 
-                  <tbody>
-                    {fileInfo.map((item: {}, i = 0) => {
-                      i++;
-                      return (
-                        <tr key={"student" + i}>
-                          {Object.values(item).map((val: any, i = 0) => {
-                            i++;
-                            return <td key={val + i}>{val}</td>;
-                          })}
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-                <button
-                  className="bg-blue-500 md:h-[30%] md:w-[30%] hover:bg-blue-700 text-white font-bold py-2 px-3 rounded focus:outline-none focus:shadow-outline"
-                  type="submit"
-                >
-                  Submit changes
-                </button>
-              </form>
-            ) : (
-              <>
-                <p>No file submited</p>
-              </>
-            )}
+              <Table.Body>
+                {fileInfo.map((item: {}, i = 0) => {
+                  i++;
+                  return (
+                    <Table.Row key={"student" + i}>
+                      {Object.values(item).map((val: any, i = 0) => {
+                        i++;
+                        return <td key={val + i}>{val}</td>;
+                      })}
+                    </Table.Row>
+                  );
+                })}
+              </Table.Body>
+            </Table>
+            <Button primary type="button" onClick={handleColSubmit}>
+              Submit changes
+            </Button>
+          </Form>
+        ) : (
+          <>
+            <p>No file submited</p>
           </>
-        }
-      />
-    </>
+        )}
+      </Modal.Content>
+    </Modal>
   );
 };
 
