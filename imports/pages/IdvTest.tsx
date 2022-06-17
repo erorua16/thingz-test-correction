@@ -5,6 +5,8 @@ import { useParams } from "react-router-dom";
 import AddQuestions from "../components/AddQuestions";
 import { Meteor } from "meteor/meteor";
 import { QuestionType } from "/imports/types/TestFormCollectionType";
+import toast from "react-hot-toast";
+import { Button, Segment, Header, Form } from "semantic-ui-react";
 
 const IdvTest = (): React.ReactElement => {
   ///////SET VARIABLES///////
@@ -16,7 +18,6 @@ const IdvTest = (): React.ReactElement => {
   const [submit, setSubmit] = React.useState<boolean>(false);
   const [isData, setIsData] = React.useState<boolean>(false);
   const [totalBarem, setTotalBarem] = React.useState<number>(0);
-  const [message, setMessage] = React.useState<string>("");
   //Subscribtion and data
   const isLoading = useSubscribe("findTest", testId);
   const data: any = useFind(() => {
@@ -29,7 +30,7 @@ const IdvTest = (): React.ReactElement => {
     if (submit) {
       updateCollection();
     }
-  }, [submit, questions, data, isData]);
+  }, [submit]);
 
   ///////SET INITIAL QUESTIONS IF THEY EXIST///////
   const messageFunction = () => {
@@ -41,12 +42,15 @@ const IdvTest = (): React.ReactElement => {
     }
     setTotalBarem(sum);
     if (sum > 20) {
-      return setMessage(`{!!WARNING!! Your total barem of ${sum.toFixed(2)} is bigger than 20}`);
+      return toast.error(
+        `Your total barem of ${sum.toFixed(2)} is bigger than 20`
+      );
     }
     if (sum < 20) {
-      return setMessage(`{!!Warning!! Your total barem of ${sum.toFixed(2)} is smaller than 20}`);
+      return toast.error(
+        `Your total barem of ${sum.toFixed(2)} is smaller than 20`
+      );
     }
-    return setMessage("")
   };
   const setQuestionData = () => {
     if (isData) {
@@ -59,7 +63,7 @@ const IdvTest = (): React.ReactElement => {
   };
   ///////HANDLE CHANGE///////
   const handleChangeQuestion = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
   ): void => {
     const { id, value, name } = e.target;
     let newArr: QuestionType[] = [...questions]; // copying the old datas array
@@ -92,6 +96,11 @@ const IdvTest = (): React.ReactElement => {
   const handleSubmit = (e: any): void => {
     //Won't submit if there is no value
     e.preventDefault();
+    setQuestions(
+      questions.filter((e: any) => {
+        return e != null;
+      })
+    );
     setSubmit(true);
   };
 
@@ -107,6 +116,7 @@ const IdvTest = (): React.ReactElement => {
           setQuestionsNumber(0);
           setQuestions([]);
           setIsData(true);
+          toast.success("Test has been successfully updated");
         }
       }
     );
@@ -123,13 +133,11 @@ const IdvTest = (): React.ReactElement => {
           {data ? (
             <>
               {setQuestionData()}
-              {message ? (
-                <p className="text-red-600"> {message}</p>
-              ) : (
-                <p> Your total barem is {totalBarem}</p>
-              )}
-              <h1 className="text-3xl "> Test name : {data.name}</h1>
-              <form action="" onSubmit={handleSubmit}>
+              <Header as="h1" className="text-3xl ">
+                Test name : {data.name}
+              </Header>
+              <Header as="h4"> Your total barem is {totalBarem}</Header>
+              <Form action="" id="formTest" onSubmit={handleSubmit}>
                 {data.questions.length == 0 ? (
                   <p> No questions</p>
                 ) : (
@@ -140,14 +148,11 @@ const IdvTest = (): React.ReactElement => {
                         i = 0
                       ) => {
                         return (
-                          <div
-                            className="bg-gray-200 py-1 my-3 px-5 flex flex-col justify-center"
-                            key={`question ${i}`}
-                          >
-                            <div className="flex flex-row items-center">
-                              <p className="text-xl mr-10">
-                                Question Title : {question.question}
-                              </p>
+                          <Segment key={`question ${i}`}>
+                            <Form.Field>
+                              <Header as="h3">
+                                Question : {question.question}
+                              </Header>
                               {/* <input
                             className="my-5 shadow border rounded w-full py-2 px-3 text-gray-700 text-lg leading-tight focus:outline-none focus:shadow-outline"
                             id={`question${i}`}
@@ -158,13 +163,14 @@ const IdvTest = (): React.ReactElement => {
                             value={questions[i] ? questions[i].question : ""}
                             onChange={handleChangeQuestion}
                           /> */}
-                            </div>
-                            <div className="flex flex-row items-center">
-                              <p className="text-xl mr-10">
-                                Question barem :{question.barem}
-                              </p>
+                            </Form.Field>
+                            <Form.Field className="largeText" inline>
+                              <label>
+                                <Header as="h3">
+                                  Barem : {question.barem}
+                                </Header>
+                              </label>
                               <input
-                                className="shadow border rounded py-2 px-3 text-gray-700 text-lg leading-tight focus:outline-none focus:shadow-outline"
                                 id={`barem${i}`}
                                 key={`barem${i}`}
                                 name={`${i}`}
@@ -174,15 +180,14 @@ const IdvTest = (): React.ReactElement => {
                                 value={questions[i] ? questions[i].barem : ""}
                                 onChange={handleChangeQuestion}
                               />
-                            </div>
-                          </div>
+                            </Form.Field>
+                          </Segment>
                         );
                       }
                     )}
                   </>
                 )}
-                <button
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 mr-5 rounded focus:outline-none focus:shadow-outline"
+                <Button
                   onClick={() => {
                     if (
                       questions[questions.length - 1].question !== "" &&
@@ -194,8 +199,7 @@ const IdvTest = (): React.ReactElement => {
                   type="button"
                 >
                   Add more questions
-                </button>
-                {console.log(questions)}
+                </Button>
                 <AddQuestions
                   questions={questions}
                   questionsNumber={questionsNumber}
@@ -204,13 +208,10 @@ const IdvTest = (): React.ReactElement => {
                     data.questions ? data.questions.length - 1 : -1
                   }
                 />
-                <button
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded focus:outline-none focus:shadow-outline"
-                  type="submit"
-                >
+                <Button primary type="submit">
                   Update Test Info
-                </button>
-              </form>
+                </Button>
+              </Form>
             </>
           ) : (
             <></>
