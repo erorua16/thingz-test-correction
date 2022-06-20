@@ -9,8 +9,20 @@ import { TestFormCollectionType } from "../types/TestFormCollectionType";
 import { PromoStudentsCollectionType } from "../types/PromoStudentsCollectionType";
 import { StudentsTestsCorrectionsCollection } from "../api/StudentsTestsCorrectionsCollection";
 import toast from "react-hot-toast";
-import { Button, Form, Segment, Select, Header, Grid } from "semantic-ui-react";
+import {
+  Button,
+  Form,
+  Segment,
+  TextArea,
+  Select,
+  Header,
+  Grid,
+} from "semantic-ui-react";
 
+type EditCriteria = {
+  edit: boolean;
+  criteria: string;
+};
 const StudentTestCorrection = () => {
   ///////SET VARIABLES///////
   //Use params
@@ -29,8 +41,11 @@ const StudentTestCorrection = () => {
   const [dataCorrectionIndex, setDataCorrectionIndex] =
     React.useState<number>(0);
   const [executed, setExecuted] = React.useState<boolean>(false);
-  const [totalBarem, setTotalBarem] = React.useState<number>(0);
-  const [message, setMessage] = React.useState<string>("");
+  const [edit, setEdit] = React.useState<EditCriteria>({
+    edit: false,
+    criteria: "",
+  });
+  const [editedCriteria, setEditedCriteria] = React.useState<GradingCriteriaType>({name: "", points: 0})
   //Is loading
   const isLoadingPromo = useSubscribe("findPromo", promoId);
   const isLoadingTest = useSubscribe("findTest", testId);
@@ -55,6 +70,7 @@ const StudentTestCorrection = () => {
   ////////ON CLICK EVENT///////
   const changeQuestion = (next: boolean) => {
     setNewCategory({ name: "" });
+    setEdit({ edit: false, criteria: "" });
     if (next) {
       setQuestionNumber(questionNumber + 1);
     } else {
@@ -79,6 +95,7 @@ const StudentTestCorrection = () => {
               setQuestionNumber(questionNumber + 1);
             }, 100);
             setNewCategory({ name: "" });
+            setEdit({ edit: false, criteria: "" });
           }
           break;
         case "ArrowUp":
@@ -87,6 +104,7 @@ const StudentTestCorrection = () => {
               setQuestionNumber(questionNumber - 1);
             }, 100);
             setNewCategory({ name: "" });
+            setEdit({ edit: false, criteria: "" });
           }
           break;
         case "ArrowRight":
@@ -175,7 +193,7 @@ const StudentTestCorrection = () => {
         (err: any, result: any) => {
           if (err) {
             toast.dismiss();
-            toast.error("An error has occured while processing your request")
+            toast.error("An error has occured while processing your request");
           }
           if (result) {
             toast.dismiss();
@@ -187,7 +205,7 @@ const StudentTestCorrection = () => {
   };
   const updateGrade = () => {
     toast.loading("Loading...");
-    setTimeout(()=> {
+    setTimeout(() => {
       Meteor.call(
         "updateStudentGrade",
         {
@@ -197,7 +215,7 @@ const StudentTestCorrection = () => {
         (err: any, result: any) => {
           if (err) {
             toast.dismiss();
-            toast.error("An error has occured while processing your request")
+            toast.error("An error has occured while processing your request");
           }
           if (result) {
             toast.dismiss();
@@ -205,7 +223,7 @@ const StudentTestCorrection = () => {
           }
         }
       );
-    },500)
+    }, 500);
   };
 
   ///////USE EFFECT///////
@@ -293,7 +311,7 @@ const StudentTestCorrection = () => {
                       )}
                     </Grid.Column>
                     <Grid.Column
-                      verticalAlign="middle"
+                      verticalAlign="top"
                       textAlign="left"
                       width="7"
                     >
@@ -367,7 +385,7 @@ const StudentTestCorrection = () => {
                     </Grid.Column>
 
                     <Grid.Column
-                      verticalAlign="middle"
+                      verticalAlign="top"
                       textAlign="right"
                       width="5"
                     >
@@ -381,32 +399,100 @@ const StudentTestCorrection = () => {
                           ].map((criteria: GradingCriteriaType) => {
                             return (
                               <div
-                                className="widthAll largeText"
+                                className="smallerSpaceOnY largeText "
                                 key={criteria.name}
                               >
-                                <label>
-                                  <input
-                                    type="radio"
-                                    value={
-                                      criteria.points ? criteria.points : 0
-                                    }
-                                    checked={
-                                      dataCorrections[dataCorrectionIndex]
-                                        ? String(
+                                {edit.edit && edit.criteria == criteria.name ? (
+                                  <Form
+                                    onSubmit={(e) => {
+                                      e.preventDefault();
+                                    }}
+                                  >
+                                    <Form.Field
+                                      className="largerForm widthAll"
+                                      inline
+                                    >
+                                      <label>Criteria name</label>
+                                      <input
+                                      type="text"
+                                        value={
+                                          criteria.name ? criteria.name : ""
+                                        }
+                                      />
+                                    </Form.Field>
+                                    <Form.Field
+                                      inline
+                                      className="largerForm widthAll"
+                                    >
+                                      <label> Criteria points</label>
+                                      <input
+                                        type="number"
+                                        value={
+                                          criteria.points ? criteria.points : 0
+                                        }
+                                      />
+                                    </Form.Field>
+                                    <Button compact primary>
+                                      Submit
+                                    </Button>
+                                    <Button
+                                      compact
+                                      secondary
+                                      onClick={() => {
+                                        setEdit({ edit: false, criteria: "" });
+                                      }}
+                                    >
+                                      Cancel
+                                    </Button>
+                                  </Form>
+                                ) : (
+                                  <>
+                                    <Form.Field className="widthAll textAlignLeft" inline>
+                                      <div className="widthSmall">
+                                        <input
+                                          type="radio"
+                                          value={
+                                            criteria.points
+                                              ? criteria.points
+                                              : 0
+                                          }
+                                          checked={
                                             dataCorrections[dataCorrectionIndex]
-                                              .points
-                                          ) === String(criteria.points) ||
-                                          (dataCorrections[dataCorrectionIndex]
-                                            .points == undefined &&
-                                            criteria.points == 0)
-                                        : undefined
-                                    }
-                                    onChange={handleOptionChange}
-                                    className="textAlignLeft marginRight"
-                                  />
-                                  {criteria.name}
-                                </label>
-                                <p>{criteria.points}</p>
+                                              ? String(
+                                                  dataCorrections[
+                                                    dataCorrectionIndex
+                                                  ].points
+                                                ) === String(criteria.points) ||
+                                                (dataCorrections[
+                                                  dataCorrectionIndex
+                                                ].points == undefined &&
+                                                  criteria.points == 0)
+                                              : undefined
+                                          }
+                                          onChange={handleOptionChange}
+                                          className="marginRight"
+                                        />
+                                        <label>{criteria.name}</label>
+                                      </div>
+                                      <div>
+                                        <label>{criteria.points}</label>
+                                        <label>
+                                          <Button
+                                            compact
+                                            onClick={() => {
+                                              setEdit({
+                                                edit: true,
+                                                criteria: criteria.name,
+                                              });
+                                            }}
+                                          >
+                                            Edit
+                                          </Button>
+                                        </label>
+                                      </div>
+                                    </Form.Field>
+                                  </>
+                                )}
                               </div>
                             );
                           })

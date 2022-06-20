@@ -48,6 +48,32 @@ const IdvTestGrades = () => {
     });
     return total;
   };
+  const questionsCells = (studentIndex: number) => {
+    const data = dataTest.questions.map((e, i) => {
+      return (
+        <Table.Cell key={`grade${studentIndex}${i}`} scope="col" l>
+          {" "}
+          0.00{" "}
+        </Table.Cell>
+      );
+    });
+    dataCorrections.map((e) => {
+      if (e.studentNumber === studentIndex) {
+        data[e.questionNumber] = (
+          <Table.Cell
+            key={`grade${studentIndex}${e.points}${e.questionNumber}`}
+            scope="col"
+          >
+            {e.points}
+          </Table.Cell>
+        );
+      }
+    });
+
+    return data;
+  };
+
+  React.useEffect(() => {}, []);
 
   return (
     <>
@@ -61,54 +87,30 @@ const IdvTestGrades = () => {
                 <Table striped celled size="large" padded>
                   <Table.Header className="largeText">
                     <Table.Row>
-                      <Table.HeaderCell scope="col">Student name</Table.HeaderCell>
+                      <Table.HeaderCell scope="col">
+                        Student name
+                      </Table.HeaderCell>
                       {dataTest.questions.map((e, i) => {
                         return (
-                          <Table.HeaderCell
-                            key={`question${i}`}
-                            scope="col"
-                          >
+                          <Table.HeaderCell key={`question${i}`} scope="col">
                             Q{i + 1}
                           </Table.HeaderCell>
                         );
                       })}
-                      <Table.HeaderCell scope="col">
-                        Total
-                      </Table.HeaderCell>
+                      <Table.HeaderCell scope="col">Total</Table.HeaderCell>
                     </Table.Row>
                   </Table.Header>
                   <Table.Body>
                     {dataPromo.students.map((student, studentIndex) => {
                       return (
-                        <Table.Row
-                          key={`student${studentIndex}`}
-                        >
-                          <Table.Cell
-                            scope="row"
-                          >
+                        <Table.Row key={`student${studentIndex}`}>
+                          <Table.Cell scope="row">
                             {student.firstName && student.lastName
                               ? student.firstName + " " + student.lastName
                               : student.firstAndLastName}
                           </Table.Cell>
-                          {dataCorrections.map((e) => {
-                            if (e.studentNumber == studentIndex) {
-                              return (
-                                <Table.Cell
-                                  key={`grade${studentIndex}${e.points}${e.questionNumber}`}
-                                  scope="col"
-                                >
-                                  {(
-                                    dataTest.questions[e.questionNumber]
-                                      .barem! * e.points
-                                  ).toFixed(2)}
-                                </Table.Cell>
-                              );
-                            }
-                          })}
-                          <Table.Cell
-                            key={`total${studentIndex}`}
-                            scope="col"
-                          >
+                          {questionsCells(studentIndex)}
+                          <Table.Cell key={`total${studentIndex}`} scope="col">
                             {totalStudent(studentIndex).toFixed(2)}
                           </Table.Cell>
                         </Table.Row>

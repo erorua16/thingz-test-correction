@@ -13,6 +13,10 @@
     margin-top: 25px;
     margin-bottom: 25px
 }
+.smallerSpaceOnY {
+    margin-top: 10px;
+    margin-bottom: 10px
+}
 textarea{
     width: 870px!important;
 }
@@ -22,7 +26,7 @@ textarea{
 .widthAll{
     display:flex;
     flex-direction: row;
-    justify-content: space-between
+    justify-content: space-between;
 }
 .heightAll{
     display:flex;
@@ -38,4 +42,13 @@ textarea{
 }
 .buttonHeight{
     height: 25%
+}
+.largerForm{
+    width: 400px
+}
+.formAlignRight{
+    text-align: right
+}
+.widthSmall{
+    width: 270px
 }
