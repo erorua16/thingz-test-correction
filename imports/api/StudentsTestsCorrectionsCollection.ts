@@ -20,13 +20,6 @@ Meteor.methods({
             $set: {
                 points : points            
             }
-          },{}, (err:any, result:any) => {
-            if(err){
-              console.log(err)
-            }
-            if(result){
-              console.log(result)
-            }
           })
     }
 })
