@@ -9,7 +9,7 @@ const Homepage = () => {
       <h1> Homepage </h1>
       <div>
         <Link to="/create-test">
-          <Button primary>Create new test</Button>
+          <Button primary type="button">Create new test</Button>
         </Link>
         <PromoImport />
       </div>

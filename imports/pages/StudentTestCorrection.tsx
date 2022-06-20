@@ -45,7 +45,8 @@ const StudentTestCorrection = () => {
     edit: false,
     criteria: "",
   });
-  const [editedCriteria, setEditedCriteria] = React.useState<GradingCriteriaType>({name: "", points: 0})
+  const [editedCriteria, setEditedCriteria] =
+    React.useState<GradingCriteriaType>({ name: "", points: 0 });
   //Is loading
   const isLoadingPromo = useSubscribe("findPromo", promoId);
   const isLoadingTest = useSubscribe("findTest", testId);
@@ -130,9 +131,11 @@ const StudentTestCorrection = () => {
       setNoteGraded(true);
     }, 500);
   };
-  const handleCategoryChange = (e: any) => {
+  const handleCategoryChange = (e: any, newCat: boolean) => {
     const { id, value } = e.target;
-    let newArr: GradingCriteriaType = { ...newCategory };
+    let newArr: GradingCriteriaType = newCat
+      ? { ...newCategory }
+      : { ...editedCriteria };
     if (id == "points") {
       newArr = {
         name: newArr.name,
@@ -144,7 +147,7 @@ const StudentTestCorrection = () => {
         points: newArr.points,
       };
     }
-    setNewCategory(newArr);
+    newCat ? setNewCategory(newArr) : setEditedCriteria(newArr);
   };
 
   ///////HANDLE SUBMIT///////
@@ -225,7 +228,33 @@ const StudentTestCorrection = () => {
       );
     }, 500);
   };
-
+  const updateGradingCriteria = (criteriaIndex: number) => {
+    const newCriterias = [
+      ...dataTest.questions[questionNumber]["gradingCriteria"],
+    ];
+    newCriterias[criteriaIndex] = editedCriteria;
+    newCriterias.sort((a, b) => {
+      return a.points - b.points;
+    });
+    Meteor.call(
+      "updateTestGradingCriteria",
+      {
+        _id: testId,
+        questionNumber: questionNumber,
+        newCriterias: newCriterias,
+      },
+      (err: any, result: any) => {
+        if (err) {
+          console.log(err);
+        }
+        if (result) {
+          setCriteriaSubmit(false);
+          setAddCategory(false);
+          setEditedCriteria({ name: "", points: 0 });
+        }
+      }
+    );
+  };
   ///////USE EFFECT///////
   React.useEffect(() => {
     if (criteriaSubmit) {
@@ -278,6 +307,7 @@ const StudentTestCorrection = () => {
                 <Grid.Row verticalAlign="bottom" centered>
                   {questionNumber > 0 ? (
                     <Button
+                      type="button"
                       secondary
                       onClick={() => {
                         changeQuestion(false);
@@ -287,7 +317,12 @@ const StudentTestCorrection = () => {
                       Previous Question
                     </Button>
                   ) : (
-                    <Button secondary disabled className="buttonHeight">
+                    <Button
+                      secondary
+                      disabled
+                      type="button"
+                      className="buttonHeight"
+                    >
                       Previous Question
                     </Button>
                   )}
@@ -298,6 +333,7 @@ const StudentTestCorrection = () => {
                       {studentNumber > 0 ? (
                         <Button
                           secondary
+                          type="button"
                           onClick={() => {
                             changeStudent(false);
                           }}
@@ -305,16 +341,12 @@ const StudentTestCorrection = () => {
                           Previous student
                         </Button>
                       ) : (
-                        <Button disabled secondary>
+                        <Button disabled type="button" secondary>
                           Previous Student
                         </Button>
                       )}
                     </Grid.Column>
-                    <Grid.Column
-                      verticalAlign="top"
-                      textAlign="left"
-                      width="7"
-                    >
+                    <Grid.Column verticalAlign="top" textAlign="left" width="7">
                       <Header as="h3">
                         {dataTest
                           ? dataTest.questions[questionNumber]["question"]
@@ -396,7 +428,7 @@ const StudentTestCorrection = () => {
                         ] ? (
                           dataTest.questions[questionNumber][
                             "gradingCriteria"
-                          ].map((criteria: GradingCriteriaType) => {
+                          ].map((criteria: GradingCriteriaType, i) => {
                             return (
                               <div
                                 className="smallerSpaceOnY largeText "
@@ -414,10 +446,16 @@ const StudentTestCorrection = () => {
                                     >
                                       <label>Criteria name</label>
                                       <input
-                                      type="text"
+                                        type="text"
+                                        id="criteria"
                                         value={
-                                          criteria.name ? criteria.name : ""
+                                          editedCriteria.name
+                                            ? editedCriteria.name
+                                            : ""
                                         }
+                                        onChange={(e) => {
+                                          handleCategoryChange(e, false);
+                                        }}
                                       />
                                     </Form.Field>
                                     <Form.Field
@@ -427,17 +465,32 @@ const StudentTestCorrection = () => {
                                       <label> Criteria points</label>
                                       <input
                                         type="number"
+                                        id="points"
                                         value={
-                                          criteria.points ? criteria.points : 0
+                                          editedCriteria.points
+                                            ? editedCriteria.points
+                                            : 0
                                         }
+                                        onChange={(e) => {
+                                          handleCategoryChange(e, false);
+                                        }}
                                       />
                                     </Form.Field>
-                                    <Button compact primary>
+                                    <Button
+                                      compact
+                                      primary
+                                      type="button"
+                                      onClick={() => {
+                                        updateGradingCriteria(i);
+                                        setEdit({ edit: false, criteria: "" });
+                                      }}
+                                    >
                                       Submit
                                     </Button>
                                     <Button
                                       compact
                                       secondary
+                                      type="button"
                                       onClick={() => {
                                         setEdit({ edit: false, criteria: "" });
                                       }}
@@ -447,7 +500,10 @@ const StudentTestCorrection = () => {
                                   </Form>
                                 ) : (
                                   <>
-                                    <Form.Field className="widthAll textAlignLeft" inline>
+                                    <Form.Field
+                                      className="widthAll textAlignLeft"
+                                      inline
+                                    >
                                       <div className="widthSmall">
                                         <input
                                           type="radio"
@@ -479,11 +535,13 @@ const StudentTestCorrection = () => {
                                         <label>
                                           <Button
                                             compact
+                                            type="button"
                                             onClick={() => {
                                               setEdit({
                                                 edit: true,
                                                 criteria: criteria.name,
                                               });
+                                              setEditedCriteria(criteria);
                                             }}
                                           >
                                             Edit
@@ -511,7 +569,12 @@ const StudentTestCorrection = () => {
                           Add category
                         </Button>
                       ) : (
-                        <Form action="" onSubmit={criteriaSubmitFunction}>
+                        <Form
+                          action=""
+                          onSubmit={(e) => {
+                            e.preventDefault;
+                          }}
+                        >
                           <Form.Field>
                             <input
                               type="text"
@@ -519,7 +582,7 @@ const StudentTestCorrection = () => {
                               key="criteriaInput"
                               placeholder="criteria name"
                               onChange={(e) => {
-                                handleCategoryChange(e);
+                                handleCategoryChange(e, true);
                               }}
                               value={newCategory.name ? newCategory.name : ""}
                             />
@@ -529,7 +592,7 @@ const StudentTestCorrection = () => {
                               type="number"
                               id="points"
                               onChange={(e) => {
-                                handleCategoryChange(e);
+                                handleCategoryChange(e, true);
                               }}
                               value={
                                 newCategory.points || newCategory.points == 0.0
@@ -540,7 +603,13 @@ const StudentTestCorrection = () => {
                               placeholder="0.00"
                             />
                           </Form.Field>
-                          <Button primary type="submit">
+                          <Button
+                            primary
+                            type="button"
+                            onClick={() => {
+                              criteriaSubmitFunction;
+                            }}
+                          >
                             Add
                           </Button>
                           <Button
@@ -561,6 +630,7 @@ const StudentTestCorrection = () => {
                       {studentNumber < dataPromo.students.length - 1 ? (
                         <Button
                           secondary
+                          type="button"
                           onClick={() => {
                             changeStudent(true);
                           }}
@@ -568,7 +638,7 @@ const StudentTestCorrection = () => {
                           Next student
                         </Button>
                       ) : (
-                        <Button secondary disabled>
+                        <Button secondary type="button" disabled>
                           Next student
                         </Button>
                       )}
@@ -583,6 +653,7 @@ const StudentTestCorrection = () => {
                   {questionNumber < dataTest.questions.length - 1 ? (
                     <Button
                       className="buttonHeight"
+                      type="button"
                       secondary
                       onClick={() => {
                         changeQuestion(true);
@@ -591,7 +662,12 @@ const StudentTestCorrection = () => {
                       Next Question
                     </Button>
                   ) : (
-                    <Button secondary disabled className="buttonHeight">
+                    <Button
+                      secondary
+                      disabled
+                      type="button"
+                      className="buttonHeight"
+                    >
                       Next Question
                     </Button>
                   )}

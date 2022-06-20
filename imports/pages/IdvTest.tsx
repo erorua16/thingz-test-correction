@@ -93,9 +93,7 @@ const IdvTest = (): React.ReactElement => {
   };
 
   ///////HANDLE SUBMIT///////
-  const handleSubmit = (e: any): void => {
-    //Won't submit if there is no value
-    e.preventDefault();
+  const handleSubmit = (): void => {
     setQuestions(
       questions.filter((e: any) => {
         return e != null;
@@ -137,7 +135,7 @@ const IdvTest = (): React.ReactElement => {
                 Test name : {data.name}
               </Header>
               <Header as="h4"> Your total barem is {totalBarem}</Header>
-              <Form action="" id="formTest" onSubmit={handleSubmit}>
+              <Form action="" id="formTest" onSubmit={(e) => {e.preventDefault}}>
                 {data.questions.length == 0 ? (
                   <p> No questions</p>
                 ) : (
@@ -208,7 +206,7 @@ const IdvTest = (): React.ReactElement => {
                     data.questions ? data.questions.length - 1 : -1
                   }
                 />
-                <Button primary type="submit">
+                <Button primary type="button" onClick={() => {handleSubmit}}>
                   Update Test Info
                 </Button>
               </Form>

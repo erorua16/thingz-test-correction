@@ -68,7 +68,7 @@ const AllTests = (): React.ReactElement => {
             <>
               <Header as="h3">No tests are available</Header>{" "}
               <Link to="/create-test">
-                <Button primary>Create new test</Button>
+                <Button primary type="button">Create new test</Button>
               </Link>
             </>
           )}

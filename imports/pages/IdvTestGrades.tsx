@@ -52,8 +52,7 @@ const IdvTestGrades = () => {
     const data = dataTest.questions.map((e, i) => {
       return (
         <Table.Cell key={`grade${studentIndex}${i}`} scope="col" l>
-          {" "}
-          0.00{" "}
+          0.00
         </Table.Cell>
       );
     });
