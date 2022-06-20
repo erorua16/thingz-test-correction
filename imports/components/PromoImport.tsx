@@ -189,6 +189,7 @@ const PromoImport = (): React.ReactElement => {
               accept=".csv"
               onChange={handleFileChange}
             />
+            <p> Please choose a csv file</p>
           </Form.Field>
           <Form.Field>
             <label>Promo Name</label>

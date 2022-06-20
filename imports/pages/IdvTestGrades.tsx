@@ -49,8 +49,6 @@ const IdvTestGrades = () => {
     return total;
   };
 
-  React.useEffect(() => {}, []);
-
   return (
     <>
       {isLoadingPromo() && isLoadingTest() && isLoadingCorrections() ? (
