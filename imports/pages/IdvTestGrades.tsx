@@ -40,19 +40,22 @@ const IdvTestGrades = () => {
     }
   );
   const totalStudent = (studentNumber: number) => {
-    var total = 0;
-    dataCorrections.map((e) => {
-      if (e.studentNumber === studentNumber) {
-        total += dataTest.questions[e.questionNumber].barem! * e.points;
-      }
-    });
-    return total;
+    var total: any = 0;
+    if(dataCorrections.length > 0) {
+      dataCorrections.map((e) => {
+        if (e.studentNumber === studentNumber) {
+          total += dataTest.questions[e.questionNumber].barem! * e.points;
+        }
+      });
+    }
+    return total.toFixed(2);
   };
+  //To display the answers to the questions if there are any, else show no answers
   const questionsCells = (studentIndex: number) => {
     const data = dataTest.questions.map((e, i) => {
       return (
         <Table.Cell key={`grade${studentIndex}${i}`} scope="col" l>
-          0.00
+          N/A
         </Table.Cell>
       );
     });
@@ -83,11 +86,18 @@ const IdvTestGrades = () => {
           {dataTest ? (
             <>
               <div>
-                <Table striped celled size="large" padded>
+                <Table
+                  color="blue"
+                  striped
+                  selectable
+                  celled
+                  size="large"
+                  padded
+                >
                   <Table.Header className="largeText">
                     <Table.Row>
                       <Table.HeaderCell scope="col">
-                        Student name
+                        STUDENT NAME
                       </Table.HeaderCell>
                       {dataTest.questions.map((e, i) => {
                         return (
@@ -96,7 +106,7 @@ const IdvTestGrades = () => {
                           </Table.HeaderCell>
                         );
                       })}
-                      <Table.HeaderCell scope="col">Total</Table.HeaderCell>
+                      <Table.HeaderCell scope="col">TOTAL</Table.HeaderCell>
                     </Table.Row>
                   </Table.Header>
                   <Table.Body>
@@ -110,7 +120,7 @@ const IdvTestGrades = () => {
                           </Table.Cell>
                           {questionsCells(studentIndex)}
                           <Table.Cell key={`total${studentIndex}`} scope="col">
-                            {totalStudent(studentIndex).toFixed(2)}
+                            {totalStudent(studentIndex)}
                           </Table.Cell>
                         </Table.Row>
                       );

@@ -9,6 +9,8 @@ const Navbar = () => {
 
   return (
     <Menu
+    color="blue"
+    inverted
     size="massive"
     fixed="top"
     >

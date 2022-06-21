@@ -201,7 +201,7 @@ const PromoImport = (): React.ReactElement => {
               placeholder="Insert promo name"
             />
           </Form.Field>
-          <Button secondary type="button" onClick={handleFileSubmit}>
+          <Button primary type="button" onClick={handleFileSubmit}>
             Import CSV
           </Button>
         </Form>
@@ -215,7 +215,7 @@ const PromoImport = (): React.ReactElement => {
               e.preventDefault();
             }}
           >
-            <Table size="small" striped celled collapsing padded columns="2">
+            <Table color="blue" size="small" selectable striped celled collapsing padded columns="2">
               <Table.Header>
                 <Table.Row>
                   {headerKeys.map((key, i = 0) => {
