@@ -152,6 +152,7 @@ const CreateTest = () => {
         />
 
         <Button
+          secondary
           onClick={() => {
             setQuestionsNumber(questionsNumber + 1);
           }}
@@ -166,7 +167,9 @@ const CreateTest = () => {
           <Grid centered columns="2">
             {studentPromos.length == 0 ? (
               <Grid.Column className="spaceOnY">
-                <Header as="h4">No promos are available, please import a new promo</Header>
+                <Header as="h4">
+                  No promos are available, please import a new promo
+                </Header>
               </Grid.Column>
             ) : (
               <Grid.Column className="spaceOnY">

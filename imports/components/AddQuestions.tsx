@@ -39,7 +39,7 @@ const AddQuestions = ({
               <>
                 <Form.Field className="largeText" inline>
                   <label htmlFor={`barem${i}`}>
-                    <Header as="h3">Question barem :</Header>
+                    <Header as="h3">Question grading scale :</Header>
                   </label>
                   <input
                     id={`barem${i}`}

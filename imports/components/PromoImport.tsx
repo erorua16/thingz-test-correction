@@ -169,7 +169,7 @@ const PromoImport = (): React.ReactElement => {
     <Modal
       closeIcon
       open={open}
-      trigger={<Button type="button">Add new promo</Button>}
+      trigger={<Button secondary type="button">Add new promo</Button>}
       onClose={() => setOpen(false)}
       onOpen={() => setOpen(true)}
     >

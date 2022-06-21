@@ -152,7 +152,6 @@ const StudentTestCorrection = () => {
 
   ///////HANDLE SUBMIT///////
   const criteriaSubmitFunction = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
     setCriteriaSubmit(true);
   };
   const addNewCategory = () => {
@@ -184,49 +183,50 @@ const StudentTestCorrection = () => {
   };
   const addGrade = () => {
     toast.loading("Loading...");
-    setTimeout(() => {
-      Meteor.call(
-        "insertGrade",
-        {
-          testId: testId,
-          questionNumber: questionNumber,
-          studentNumber: studentNumber,
-          points: selectedOption,
-        },
-        (err: any, result: any) => {
-          if (err) {
-            toast.dismiss();
-            toast.error("An error has occured while processing your request");
-          }
-          if (result) {
+
+    Meteor.call(
+      "insertGrade",
+      {
+        testId: testId,
+        questionNumber: questionNumber,
+        studentNumber: studentNumber,
+        points: selectedOption,
+      },
+      (err: any, result: any) => {
+        if (err) {
+          toast.dismiss();
+          toast.error("An error has occured while processing your request");
+        }
+        if (result) {
+          setTimeout(() => {
             toast.dismiss();
             toast.success("Grade has been added");
-          }
+          }, 500);
         }
-      );
-    }, 500);
+      }
+    );
   };
   const updateGrade = () => {
     toast.loading("Loading...");
-    setTimeout(() => {
-      Meteor.call(
-        "updateStudentGrade",
-        {
-          _id: dataCorrections[dataCorrectionIndex]._id,
-          points: selectedOption,
-        },
-        (err: any, result: any) => {
-          if (err) {
-            toast.dismiss();
-            toast.error("An error has occured while processing your request");
-          }
-          if (result) {
+    Meteor.call(
+      "updateStudentGrade",
+      {
+        _id: dataCorrections[dataCorrectionIndex]._id,
+        points: selectedOption,
+      },
+      (err: any, result: any) => {
+        if (err) {
+          toast.dismiss();
+          toast.error("An error has occured while processing your request");
+        }
+        if (result) {
+          setTimeout(() => {
             toast.dismiss();
             toast.success("Grade has been updated");
-          }
+          }, 500);
         }
-      );
-    }, 500);
+      }
+    );
   };
   const updateGradingCriteria = (criteriaIndex: number) => {
     const newCriterias = [
@@ -305,6 +305,7 @@ const StudentTestCorrection = () => {
               <Header as="h1">Student Test Correction : {dataTest.name}</Header>
               <Grid padded className="gridPage">
                 <Grid.Row verticalAlign="bottom" centered>
+                  {/* //////SEPARATe COMPONENT */}
                   {questionNumber > 0 ? (
                     <Button
                       type="button"
@@ -371,11 +372,11 @@ const StudentTestCorrection = () => {
                         )}
                         {dataTest.questions[questionNumber].barem ? (
                           <p>
-                            <b>Barem:</b>{" "}
+                            <b>Grading scale:</b>
                             {dataTest.questions[questionNumber].barem}
                           </p>
                         ) : (
-                          <p> No barem has been set for this question</p>
+                          <p> No grading scale has been set for this question</p>
                         )}
 
                         {dataCorrections.length > 0 ? (
@@ -392,7 +393,7 @@ const StudentTestCorrection = () => {
                                 if (dataTest.questions[questionNumber].barem) {
                                   return (
                                     <p>
-                                      <b>Grade with barem :</b>
+                                      <b>Scaled grade:</b>
                                       {dataTest.questions[questionNumber]
                                         .barem! * e.points}
                                     </p>
@@ -400,7 +401,7 @@ const StudentTestCorrection = () => {
                                 } else {
                                   return (
                                     <p>
-                                      <b>Grade without barem :</b>{" "}
+                                      <b>Grade without scale :</b>
                                       {e.points || 0}
                                     </p>
                                   );
@@ -607,7 +608,7 @@ const StudentTestCorrection = () => {
                             primary
                             type="button"
                             onClick={() => {
-                              criteriaSubmitFunction;
+                              criteriaSubmitFunction();
                             }}
                           >
                             Add

@@ -43,12 +43,12 @@ const IdvTest = (): React.ReactElement => {
     setTotalBarem(sum);
     if (sum > 20) {
       return toast.error(
-        `Your total barem of ${sum.toFixed(2)} is bigger than 20`
+        `Your total grading scale of ${sum.toFixed(2)} is bigger than 20`
       );
     }
     if (sum < 20) {
       return toast.error(
-        `Your total barem of ${sum.toFixed(2)} is smaller than 20`
+        `Your total grading scale of ${sum.toFixed(2)} is smaller than 20`
       );
     }
   };
@@ -134,7 +134,7 @@ const IdvTest = (): React.ReactElement => {
               <Header as="h1" className="text-3xl ">
                 Test name : {data.name}
               </Header>
-              <Header as="h4"> Your total barem is {totalBarem}</Header>
+              <Header as="h4"> Your total grading scale is {totalBarem}</Header>
               <Form
                 action=""
                 id="formTest"
@@ -171,7 +171,7 @@ const IdvTest = (): React.ReactElement => {
                             <Form.Field className="largeText" inline>
                               <label>
                                 <Header as="h3">
-                                  Barem : {question.barem}
+                                  Grading scale : {question.barem}
                                 </Header>
                               </label>
                               <input
