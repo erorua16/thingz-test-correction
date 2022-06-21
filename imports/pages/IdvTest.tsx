@@ -135,7 +135,13 @@ const IdvTest = (): React.ReactElement => {
                 Test name : {data.name}
               </Header>
               <Header as="h4"> Your total barem is {totalBarem}</Header>
-              <Form action="" id="formTest" onSubmit={(e) => {e.preventDefault}}>
+              <Form
+                action=""
+                id="formTest"
+                onSubmit={(e) => {
+                  e.preventDefault;
+                }}
+              >
                 {data.questions.length == 0 ? (
                   <p> No questions</p>
                 ) : (
@@ -206,7 +212,13 @@ const IdvTest = (): React.ReactElement => {
                     data.questions ? data.questions.length - 1 : -1
                   }
                 />
-                <Button primary type="button" onClick={() => {handleSubmit}}>
+                <Button
+                  primary
+                  type="button"
+                  onClick={() => {
+                    handleSubmit();
+                  }}
+                >
                   Update Test Info
                 </Button>
               </Form>
